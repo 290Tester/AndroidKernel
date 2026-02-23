@@ -1,0 +1,42 @@
+name: Sync AOSP Kernel
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install repo
+        run: |
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo
+          chmod +x /usr/local/bin/repo
+
+      - name: Sync
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          repo init -u https://android.googlesource.com/kernel/manifest -b common-android12-5.10 --depth=1
+          repo sync -c -j8 --no-tags
+
+      - name: Pack all
+        run: |
+          cd ..
+          tar --zstd -cvf /tmp/aosp-kernel-5.10.tar.zst kernel-manifest/
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: /tmp/aosp-kernel-5.10.tar.zst
+          tag_name: latest
+          name: AOSP Kernel 5.10 Full
+          body: |
+            Full repo sync including:
+            - common/ (kernel source)
+            - build/ (build system)
+            - prebuilts/ (toolchains)
+            - All modules
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
