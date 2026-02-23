@@ -24,8 +24,7 @@ jobs:
 
       - name: Pack all
         run: |
-          cd ..
-          tar --zstd -cvf /tmp/aosp-kernel-5.10.tar.zst kernel-manifest/
+          tar --zstd -cvf /tmp/aosp-kernel-5.10.tar.zst *
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -33,11 +32,5 @@ jobs:
           files: /tmp/aosp-kernel-5.10.tar.zst
           tag_name: latest
           name: AOSP Kernel 5.10 Full
-          body: |
-            Full repo sync including:
-            - common/ (kernel source)
-            - build/ (build system)
-            - prebuilts/ (toolchains)
-            - All modules
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
