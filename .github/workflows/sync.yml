@@ -1,5 +1,9 @@
 name: Sync AOSP Kernel
 
+permissions:
+  contents: write
+  actions: read
+
 on:
   push:
   workflow_dispatch:
